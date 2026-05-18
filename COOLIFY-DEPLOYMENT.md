@@ -1,0 +1,37 @@
+# Minimal-invasiver Coolify-Spike fuer Dograh
+
+Diese lokale Variante ist als Spike vorbereitet, nicht als produktionsreife DSGVO-Konfiguration. Sie baut `api` und `ui` aus diesem Clone, statt die Upstream-Images direkt zu verwenden. Das ist wichtig, weil die Dograh-UI `NEXT_PUBLIC_*`-Werte beim Build einbettet und die Standard-Dateien Demo-/Telemetry-Defaults enthalten.
+
+Der Spike veraendert keinen Dograh-Anwendungscode. Insbesondere bleibt MinIO im Upstream-Verhalten unveraendert. Eine echte Storage-Haertung ist bewusst postponed bis zur Entscheidung, Dograh produktiv zu nutzen.
+
+## Dateien
+
+- `docker-compose.coolify.yml`: Coolify-taugliches Compose-Profil ohne Cloudflared/nginx und mit Telemetrie deaktiviert.
+- `.env.coolify.example`: Vorlage fuer Coolify-Environment-Variablen.
+- `ui/Dockerfile.coolify`: UI-Build ohne Dograh-Chatwoot/PostHog/Sentry-Defaults und mit eigener Public-API-URL.
+
+## Coolify-Einrichtung
+
+1. Repository als privates Git-Repo in Coolify verbinden.
+2. Als Compose-Datei `docker-compose.coolify.yml` auswaehlen.
+3. Die Variablen aus `.env.coolify.example` in Coolify setzen.
+4. Drei HTTPS-Domains routen:
+   - UI: `ui` auf Port `3010`
+   - API: `api` auf Port `8000`
+   - Datei-Endpunkt: `minio` auf Port `9000`
+5. MinIO-Konsole auf Port `9001` nicht oeffentlich routen.
+
+## Spike-Abgrenzung
+
+Die Compose-Variante setzt Telemetrie server- und clientseitig auf `false` und leert PostHog-, Sentry- und Langfuse-Defaults. Das ist fuer einen technischen Spike sinnvoll, aber kein Nachweis fuer DSGVO-Produktionsreife.
+
+- Keine echten Anruferdaten oder Gesundheitsdaten im Spike verwenden.
+- Keine Dograh-MPS/Demo-Provider fuer echte Anruferdaten verwenden.
+- MinIO bleibt im Upstream-Verhalten. Storage-Haertung wird erst entschieden, wenn Dograh produktiv weiterverfolgt wird.
+- LLM/STT/TTS, Webhooks, Tools und Odoo-Zugriffe sind im Spike gesondert zu pruefen.
+
+## Wichtige technische Hinweise
+
+- `FASTAPI_WORKERS` bleibt in `docker-compose.coolify.yml` absichtlich bei `1`. Dograh startet mehrere Uvicorn-Prozesse auf fortlaufenden Ports; ohne vorgeschalteten internen Load Balancer waeren zusaetzliche Worker nicht erreichbar.
+- WebRTC/WebSocket-Funktionen brauchen eine oeffentliche API-Domain (`PUBLIC_BACKEND_URL`) und je nach Netzwerkumgebung TURN.
+- Diese Datei ist eine Spike-Hilfe. Eine produktive Version braucht danach eine separate Entscheidung zu Storage, Provider-Auswahl, AVVs, Loeschkonzept, Zugriffskontrollen und Betriebsprozessen.

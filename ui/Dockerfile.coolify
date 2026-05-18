@@ -1,0 +1,74 @@
+# Coolify/production UI image.
+#
+# This is separate from ui/Dockerfile because Next.js embeds NEXT_PUBLIC_*
+# values at build time. A private Coolify deployment needs its own public API
+# URL and should not inherit Dograh's demo Chatwoot/PostHog/Sentry defaults.
+
+FROM node:20-alpine AS deps
+WORKDIR /app
+
+RUN apk add --no-cache python3 make g++ libc6-compat
+
+COPY ui/package*.json ./
+RUN rm -rf node_modules && \
+    npm ci || npm install
+
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+RUN apk add --no-cache libc6-compat
+
+COPY --from=deps /app/node_modules ./node_modules
+
+COPY ui/package*.json ./
+COPY ui/tsconfig.json ./
+COPY ui/next.config.ts ./
+COPY ui/components.json ./
+COPY ui/sentry.edge.config.ts ./
+COPY ui/sentry.server.config.ts ./
+COPY ui/postcss.config.mjs ./
+COPY ui/public ./public
+COPY ui/src ./src
+
+ARG NEXT_PUBLIC_BACKEND_URL
+ARG NEXT_PUBLIC_NODE_ENV=oss
+ARG NEXT_PUBLIC_CHATWOOT_URL=
+ARG NEXT_PUBLIC_CHATWOOT_TOKEN=
+ARG NEXT_PUBLIC_POSTHOG_KEY=
+ARG NEXT_PUBLIC_POSTHOG_HOST=
+ARG NEXT_PUBLIC_POSTHOG_UI_HOST=
+ARG NEXT_PUBLIC_SENTRY_DSN=
+
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+ENV NEXT_PUBLIC_NODE_ENV=${NEXT_PUBLIC_NODE_ENV}
+ENV NEXT_PUBLIC_CHATWOOT_URL=${NEXT_PUBLIC_CHATWOOT_URL}
+ENV NEXT_PUBLIC_CHATWOOT_TOKEN=${NEXT_PUBLIC_CHATWOOT_TOKEN}
+ENV NEXT_PUBLIC_POSTHOG_KEY=${NEXT_PUBLIC_POSTHOG_KEY}
+ENV NEXT_PUBLIC_POSTHOG_HOST=${NEXT_PUBLIC_POSTHOG_HOST}
+ENV NEXT_PUBLIC_POSTHOG_UI_HOST=${NEXT_PUBLIC_POSTHOG_UI_HOST}
+ENV NEXT_PUBLIC_SENTRY_DSN=${NEXT_PUBLIC_SENTRY_DSN}
+ENV BACKEND_URL=http://api:8000
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+RUN npm run build && \
+    rm -rf /tmp/* /root/.npm /root/.next/cache
+
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+USER nextjs
+
+EXPOSE 3010
+
+CMD sh -c "echo 'Dograh UI ready at http://localhost:3010' && PORT=3010 node server.js"

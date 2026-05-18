@@ -1,0 +1,154 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dograh}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-dograh}
+    volumes:
+      - dograh-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - dograh
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["sh", "-c", "redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
+    volumes:
+      - dograh-redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - dograh
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD}
+      MINIO_API_CORS_ALLOW_ORIGIN: ${PUBLIC_UI_URL:?Set PUBLIC_UI_URL}
+    volumes:
+      - dograh-minio:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks:
+      - dograh
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    image: dograh-api:coolify
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: production
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_TO_FILE: "false"
+      BACKEND_API_ENDPOINT: ${PUBLIC_BACKEND_URL:?Set PUBLIC_BACKEND_URL}
+      UI_APP_URL: ${PUBLIC_UI_URL:?Set PUBLIC_UI_URL}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-dograh}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dograh}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      ENABLE_AWS_S3: ${ENABLE_AWS_S3:-false}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_PUBLIC_ENDPOINT: ${PUBLIC_MINIO_URL:?Set PUBLIC_MINIO_URL}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET:-voice-audio}
+      MINIO_SECURE: "false"
+      OSS_JWT_SECRET: ${OSS_JWT_SECRET:?Set OSS_JWT_SECRET}
+      FASTAPI_WORKERS: "1"
+      ARQ_WORKERS: ${ARQ_WORKERS:-1}
+      TURN_HOST: ${TURN_HOST:-}
+      TURN_SECRET: ${TURN_SECRET:-}
+      FORCE_TURN_RELAY: ${FORCE_TURN_RELAY:-false}
+      ENABLE_TELEMETRY: "false"
+      POSTHOG_API_KEY: ""
+      POSTHOG_HOST: ""
+      SENTRY_DSN: ""
+      LANGFUSE_SECRET_KEY: ""
+      LANGFUSE_PUBLIC_KEY: ""
+      LANGFUSE_HOST: ""
+    volumes:
+      - dograh-tmp:/tmp
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health').read()\"",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    networks:
+      - dograh
+
+  ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile.coolify
+      args:
+        NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:?Set PUBLIC_BACKEND_URL}
+        NEXT_PUBLIC_NODE_ENV: oss
+        NEXT_PUBLIC_CHATWOOT_URL: ""
+        NEXT_PUBLIC_CHATWOOT_TOKEN: ""
+        NEXT_PUBLIC_POSTHOG_KEY: ""
+        NEXT_PUBLIC_POSTHOG_HOST: ""
+        NEXT_PUBLIC_POSTHOG_UI_HOST: ""
+        NEXT_PUBLIC_SENTRY_DSN: ""
+    image: dograh-ui:coolify
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: http://api:8000
+      NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL}
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      ENABLE_TELEMETRY: "false"
+      POSTHOG_KEY: ""
+      POSTHOG_HOST: ""
+      SENTRY_DSN: ""
+      NEXT_PUBLIC_SENTRY_DSN: ""
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3010 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - dograh
+
+volumes:
+  dograh-postgres:
+  dograh-redis:
+  dograh-minio:
+  dograh-tmp:
+
+networks:
+  dograh:
+    driver: bridge
