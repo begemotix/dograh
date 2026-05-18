@@ -15,7 +15,6 @@ Es bleiben nur additive Deployment-Dateien:
 - `docker-compose.coolify.yml`
 - `.env.coolify.example`
 - `COOLIFY-DEPLOYMENT.md`
-- `ui/Dockerfile.coolify`
 - `Dograh-Fork-Diff-Bericht.md` (dieser Bericht)
 
 Es gibt aktuell **keine Aenderungen an bestehendem Dograh-Anwendungscode** mehr.
@@ -47,7 +46,7 @@ Nachteil: Der Spike ist nicht fuer echte Gesundheitsdaten geeignet. MinIO ist im
 Zweck:
 
 - Separates Compose-Profil fuer Coolify.
-- Baut `api` und `ui` aus diesem Clone.
+- Nutzt die veroeffentlichten Upstream-Images `ghcr.io/dograh-hq/dograh-api:latest` und `ghcr.io/dograh-hq/dograh-ui:latest`.
 - Deaktiviert Telemetrie-Defaults per Environment.
 - Nutzt eigene Public URLs fuer UI, API und MinIO.
 - Nutzt Coolifys `SERVICE_URL_*` Werte als Fallback, wenn `PUBLIC_*` nicht manuell gesetzt ist.
@@ -59,6 +58,7 @@ Risiko:
 - Minimaler Fork-Aufwand, weil die Datei additiv ist.
 - Noch nicht mit `docker compose config` verifiziert, da Docker lokal nicht im PATH verfuegbar war.
 - Wenn `api` wirklich crasht, kann der Deploy trotzdem weiterlaufen. Dann sind die `api`-Container-Logs die naechste Diagnosequelle.
+- Die UI wird nicht aus dem Fork gebaut. Fuer den Spike ist das schnell und stabiler; fuer Produktion muss build-time Kontrolle separat bewertet werden.
 
 ### `.env.coolify.example`
 
@@ -72,17 +72,6 @@ Risiko:
 - Keine echten Secrets eintragen/committen.
 - Nicht fuer echte Anruferdaten verwenden.
 - Manuell gesetzte `PUBLIC_*` Werte muessen echte URLs sein. Platzhaltertexte wie `Set PUBLIC_MINIO_URL` sind ungueltig.
-
-### `ui/Dockerfile.coolify`
-
-Zweck:
-
-- Baut die Next.js-UI mit eigener `NEXT_PUBLIC_BACKEND_URL`.
-- Verhindert, dass Dograh-Demo-Defaults fuer Chatwoot/PostHog/Sentry in den Build geraten.
-
-Risiko:
-
-- Additive Datei, aber UI-Build muss in Coolify einmal getestet werden.
 
 ### `COOLIFY-DEPLOYMENT.md`
 

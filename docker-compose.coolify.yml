@@ -51,10 +51,7 @@ services:
       - dograh
 
   api:
-    build:
-      context: .
-      dockerfile: api/Dockerfile
-    image: dograh-api:coolify
+    image: ghcr.io/dograh-hq/dograh-api:latest
     restart: unless-stopped
     environment:
       ENVIRONMENT: production
@@ -107,19 +104,7 @@ services:
       - dograh
 
   ui:
-    build:
-      context: .
-      dockerfile: ui/Dockerfile.coolify
-      args:
-        NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-${SERVICE_URL_API:-http://localhost:8000}}
-        NEXT_PUBLIC_NODE_ENV: oss
-        NEXT_PUBLIC_CHATWOOT_URL: ""
-        NEXT_PUBLIC_CHATWOOT_TOKEN: ""
-        NEXT_PUBLIC_POSTHOG_KEY: ""
-        NEXT_PUBLIC_POSTHOG_HOST: ""
-        NEXT_PUBLIC_POSTHOG_UI_HOST: ""
-        NEXT_PUBLIC_SENTRY_DSN: ""
-    image: dograh-ui:coolify
+    image: ghcr.io/dograh-hq/dograh-ui:latest
     restart: unless-stopped
     environment:
       BACKEND_URL: http://api:8000

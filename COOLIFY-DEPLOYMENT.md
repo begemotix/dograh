@@ -1,6 +1,6 @@
 # Minimal-invasiver Coolify-Spike fuer Dograh
 
-Diese lokale Variante ist als Spike vorbereitet, nicht als produktionsreife DSGVO-Konfiguration. Sie baut `api` und `ui` aus diesem Clone, statt die Upstream-Images direkt zu verwenden. Das ist wichtig, weil die Dograh-UI `NEXT_PUBLIC_*`-Werte beim Build einbettet und die Standard-Dateien Demo-/Telemetry-Defaults enthalten.
+Diese lokale Variante ist als schneller Spike vorbereitet, nicht als produktionsreife DSGVO-Konfiguration. Sie nutzt die veroeffentlichten Dograh-Images fuer `api` und `ui`, damit Coolify nicht erst API und Next.js-UI aus Source bauen muss.
 
 Der Spike veraendert keinen Dograh-Anwendungscode. Insbesondere bleibt MinIO im Upstream-Verhalten unveraendert. Eine echte Storage-Haertung ist bewusst postponed bis zur Entscheidung, Dograh produktiv zu nutzen.
 
@@ -8,7 +8,6 @@ Der Spike veraendert keinen Dograh-Anwendungscode. Insbesondere bleibt MinIO im 
 
 - `docker-compose.coolify.yml`: Coolify-taugliches Compose-Profil ohne Cloudflared/nginx und mit Telemetrie deaktiviert.
 - `.env.coolify.example`: Vorlage fuer Coolify-Environment-Variablen.
-- `ui/Dockerfile.coolify`: UI-Build ohne Dograh-Chatwoot/PostHog/Sentry-Defaults und mit eigener Public-API-URL.
 
 ## Coolify-Einrichtung
 
@@ -29,6 +28,7 @@ Die Compose-Variante setzt Telemetrie server- und clientseitig auf `false` und l
 
 - Keine echten Anruferdaten oder Gesundheitsdaten im Spike verwenden.
 - Keine Dograh-MPS/Demo-Provider fuer echte Anruferdaten verwenden.
+- Die UI kommt im Spike aus dem Upstream-Image. Fuer einen spaeteren Produktions-Fork muss erneut entschieden werden, ob die UI selbst gebaut wird, um build-time Defaults vollstaendig zu kontrollieren.
 - MinIO bleibt im Upstream-Verhalten. Storage-Haertung wird erst entschieden, wenn Dograh produktiv weiterverfolgt wird.
 - LLM/STT/TTS, Webhooks, Tools und Odoo-Zugriffe sind im Spike gesondert zu pruefen.
 
