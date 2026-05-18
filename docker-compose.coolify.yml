@@ -13,8 +13,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    networks:
-      - dograh
 
   redis:
     image: redis:7-alpine
@@ -29,8 +27,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    networks:
-      - dograh
 
   minio:
     image: minio/minio:latest
@@ -50,8 +46,6 @@ services:
       interval: 15s
       timeout: 5s
       retries: 10
-    networks:
-      - dograh
 
   api:
     image: ghcr.io/dograh-hq/dograh-api:latest
@@ -106,8 +100,6 @@ services:
       timeout: 10s
       retries: 10
       start_period: 180s
-    networks:
-      - dograh
 
   ui:
     image: ghcr.io/dograh-hq/dograh-ui:latest
@@ -138,15 +130,9 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-    networks:
-      - dograh
 
 volumes:
   dograh-postgres:
   dograh-redis:
   dograh-minio:
   dograh-tmp:
-
-networks:
-  dograh:
-    driver: bridge

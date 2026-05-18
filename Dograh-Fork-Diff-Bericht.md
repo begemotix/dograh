@@ -53,6 +53,7 @@ Zweck:
 - Verzichtet auf Cloudflared/nginx aus der Upstream-Compose.
 - Laesst `ui` im Spike bereits starten, sobald `api` gestartet ist; der API-Healthcheck bekommt mehr Anlaufzeit.
 - Definiert port-spezifische Coolify-Routing-URLs, exposed die internen Ports und nutzt einen Node-basierten UI-Healthcheck.
+- Verzichtet auf ein eigenes Bridge-Netzwerk, damit Coolify/Traefik die Services ueber das von Coolify verwaltete Deployment-Netzwerk erreichen kann.
 
 Risiko:
 
