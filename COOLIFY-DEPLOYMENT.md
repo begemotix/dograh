@@ -14,13 +14,13 @@ Der Spike veraendert keinen Dograh-Anwendungscode. Insbesondere bleibt MinIO im 
 1. Repository als privates Git-Repo in Coolify verbinden.
 2. Als Compose-Datei `docker-compose.coolify.yml` auswaehlen.
 3. Die Variablen aus `.env.coolify.example` in Coolify setzen.
-4. Drei HTTPS-Domains routen:
-   - UI: `ui` auf Port `3010`
-   - API: `api` auf Port `8000`
-   - Datei-Endpunkt: `minio` auf Port `9000`
+4. Drei HTTPS-Domains routen. Wichtig: Coolify muss die internen Ports kennen:
+   - UI: `ui` auf Port `3010` (`SERVICE_URL_UI_3010`)
+   - API: `api` auf Port `8000` (`SERVICE_URL_API_8000`)
+   - Datei-Endpunkt: `minio` auf Port `9000` (`SERVICE_URL_MINIO_9000`)
 5. MinIO-Konsole auf Port `9001` nicht oeffentlich routen.
 
-Wenn Coolify fuer `ui`, `api` und `minio` automatisch `SERVICE_URL_*` Variablen erzeugt, koennen `PUBLIC_UI_URL`, `PUBLIC_BACKEND_URL` und `PUBLIC_MINIO_URL` leer bleiben. Falls sie manuell gesetzt werden, muessen es echte URLs mit `http://` oder `https://` sein; Platzhaltertexte wie `Set PUBLIC_MINIO_URL` bringen die API beim Start zum Absturz.
+Wenn Coolify fuer `ui`, `api` und `minio` automatisch die port-spezifischen `SERVICE_URL_*` Variablen erzeugt, koennen `PUBLIC_UI_URL`, `PUBLIC_BACKEND_URL` und `PUBLIC_MINIO_URL` leer bleiben. Falls sie manuell gesetzt werden, muessen es echte URLs mit `http://` oder `https://` sein; Platzhaltertexte wie `Set PUBLIC_MINIO_URL` bringen die API beim Start zum Absturz.
 
 ## Spike-Abgrenzung
 
@@ -36,6 +36,6 @@ Die Compose-Variante setzt Telemetrie server- und clientseitig auf `false` und l
 
 - `FASTAPI_WORKERS` bleibt in `docker-compose.coolify.yml` absichtlich bei `1`. Dograh startet mehrere Uvicorn-Prozesse auf fortlaufenden Ports; ohne vorgeschalteten internen Load Balancer waeren zusaetzliche Worker nicht erreichbar.
 - `ui` wartet im Spike nur auf `api` gestartet, nicht auf `api` healthy. Das verhindert, dass der erste Deploy wegen langsamer Migrationen/Initialisierung abbricht. Wenn die UI danach nicht erreichbar ist, zuerst die `api`-Container-Logs pruefen.
-- Die Services exposen ihre internen Ports explizit fuer Coolify: `ui:3010`, `api:8000`, `minio:9000`.
+- Die Services definieren port-spezifische Coolify-Magic-URLs und exposen ihre internen Ports: `ui:3010`, `api:8000`, `minio:9000`. Das verhindert, dass Coolify/Traefik versehentlich auf Port `80` routet und `no available server` zeigt.
 - WebRTC/WebSocket-Funktionen brauchen eine oeffentliche API-Domain (`PUBLIC_BACKEND_URL`) und je nach Netzwerkumgebung TURN.
 - Diese Datei ist eine Spike-Hilfe. Eine produktive Version braucht danach eine separate Entscheidung zu Storage, Provider-Auswahl, AVVs, Loeschkonzept, Zugriffskontrollen und Betriebsprozessen.

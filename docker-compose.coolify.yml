@@ -39,9 +39,10 @@ services:
     expose:
       - "9000"
     environment:
+      SERVICE_URL_MINIO_9000: /
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD}
-      MINIO_API_CORS_ALLOW_ORIGIN: ${PUBLIC_UI_URL:-${SERVICE_URL_UI:-http://localhost:3010}}
+      MINIO_API_CORS_ALLOW_ORIGIN: ${PUBLIC_UI_URL:-${SERVICE_URL_UI_3010:-http://localhost:3010}}
     volumes:
       - dograh-minio:/data
     healthcheck:
@@ -58,16 +59,17 @@ services:
     expose:
       - "8000"
     environment:
+      SERVICE_URL_API_8000: /
       ENVIRONMENT: production
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_TO_FILE: "false"
-      BACKEND_API_ENDPOINT: ${PUBLIC_BACKEND_URL:-${SERVICE_URL_API:-http://localhost:8000}}
-      UI_APP_URL: ${PUBLIC_UI_URL:-${SERVICE_URL_UI:-http://localhost:3010}}
+      BACKEND_API_ENDPOINT: ${PUBLIC_BACKEND_URL:-${SERVICE_URL_API_8000:-http://localhost:8000}}
+      UI_APP_URL: ${PUBLIC_UI_URL:-${SERVICE_URL_UI_3010:-http://localhost:3010}}
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-dograh}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dograh}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       ENABLE_AWS_S3: ${ENABLE_AWS_S3:-false}
       MINIO_ENDPOINT: minio:9000
-      MINIO_PUBLIC_ENDPOINT: ${PUBLIC_MINIO_URL:-${SERVICE_URL_MINIO:-http://localhost:9000}}
+      MINIO_PUBLIC_ENDPOINT: ${PUBLIC_MINIO_URL:-${SERVICE_URL_MINIO_9000:-http://localhost:9000}}
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: ${MINIO_BUCKET:-voice-audio}
@@ -113,8 +115,9 @@ services:
     expose:
       - "3010"
     environment:
+      SERVICE_URL_UI_3010: /
       BACKEND_URL: http://api:8000
-      NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-${SERVICE_URL_API:-http://localhost:8000}}
+      NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-${SERVICE_URL_API_8000:-http://localhost:8000}}
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
       ENABLE_TELEMETRY: "false"

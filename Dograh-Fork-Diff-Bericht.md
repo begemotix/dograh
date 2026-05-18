@@ -49,10 +49,10 @@ Zweck:
 - Nutzt die veroeffentlichten Upstream-Images `ghcr.io/dograh-hq/dograh-api:latest` und `ghcr.io/dograh-hq/dograh-ui:latest`.
 - Deaktiviert Telemetrie-Defaults per Environment.
 - Nutzt eigene Public URLs fuer UI, API und MinIO.
-- Nutzt Coolifys `SERVICE_URL_*` Werte als Fallback, wenn `PUBLIC_*` nicht manuell gesetzt ist.
+- Nutzt Coolifys port-spezifische `SERVICE_URL_*_PORT` Werte als Fallback, wenn `PUBLIC_*` nicht manuell gesetzt ist.
 - Verzichtet auf Cloudflared/nginx aus der Upstream-Compose.
 - Laesst `ui` im Spike bereits starten, sobald `api` gestartet ist; der API-Healthcheck bekommt mehr Anlaufzeit.
-- Exposed die internen Ports fuer Coolify explizit und nutzt einen Node-basierten UI-Healthcheck.
+- Definiert port-spezifische Coolify-Routing-URLs, exposed die internen Ports und nutzt einen Node-basierten UI-Healthcheck.
 
 Risiko:
 
