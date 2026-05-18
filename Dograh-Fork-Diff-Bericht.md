@@ -51,11 +51,13 @@ Zweck:
 - Deaktiviert Telemetrie-Defaults per Environment.
 - Nutzt eigene Public URLs fuer UI, API und MinIO.
 - Verzichtet auf Cloudflared/nginx aus der Upstream-Compose.
+- Laesst `ui` im Spike bereits starten, sobald `api` gestartet ist; der API-Healthcheck bekommt mehr Anlaufzeit.
 
 Risiko:
 
 - Minimaler Fork-Aufwand, weil die Datei additiv ist.
 - Noch nicht mit `docker compose config` verifiziert, da Docker lokal nicht im PATH verfuegbar war.
+- Wenn `api` wirklich crasht, kann der Deploy trotzdem weiterlaufen. Dann sind die `api`-Container-Logs die naechste Diagnosequelle.
 
 ### `.env.coolify.example`
 
