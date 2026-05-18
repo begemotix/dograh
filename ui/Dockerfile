@@ -69,7 +69,7 @@ USER nextjs
 
 # Expose the port Next.js runs on
 EXPOSE 3010
-ENV HOSTNAME="0.0.0.0"
+ENV HOSTNAME="::"
 
 # Start the production server using the standalone Node.js server
-CMD sh -c "echo '🚀 Application ready at http://localhost:3010' && PORT=3010 HOSTNAME=0.0.0.0 node server.js"
+CMD sh -c "echo '🚀 Application ready at http://localhost:3010' && PORT=3010 HOSTNAME=:: node server.js"
