@@ -52,6 +52,7 @@ Zweck:
 - Nutzt Coolifys `SERVICE_URL_*` Werte als Fallback, wenn `PUBLIC_*` nicht manuell gesetzt ist.
 - Verzichtet auf Cloudflared/nginx aus der Upstream-Compose.
 - Laesst `ui` im Spike bereits starten, sobald `api` gestartet ist; der API-Healthcheck bekommt mehr Anlaufzeit.
+- Exposed die internen Ports fuer Coolify explizit und nutzt einen Node-basierten UI-Healthcheck.
 
 Risiko:
 

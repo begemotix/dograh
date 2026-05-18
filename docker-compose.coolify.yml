@@ -36,6 +36,8 @@ services:
     image: minio/minio:latest
     restart: unless-stopped
     command: server /data --console-address ":9001"
+    expose:
+      - "9000"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD}
@@ -53,6 +55,8 @@ services:
   api:
     image: ghcr.io/dograh-hq/dograh-api:latest
     restart: unless-stopped
+    expose:
+      - "8000"
     environment:
       ENVIRONMENT: production
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
@@ -106,6 +110,8 @@ services:
   ui:
     image: ghcr.io/dograh-hq/dograh-ui:latest
     restart: unless-stopped
+    expose:
+      - "3010"
     environment:
       BACKEND_URL: http://api:8000
       NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-${SERVICE_URL_API:-http://localhost:8000}}
@@ -120,7 +126,11 @@ services:
       api:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3010 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"require('http').get('http://localhost:3010', r => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))\"",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5

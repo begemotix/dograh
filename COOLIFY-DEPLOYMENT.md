@@ -36,5 +36,6 @@ Die Compose-Variante setzt Telemetrie server- und clientseitig auf `false` und l
 
 - `FASTAPI_WORKERS` bleibt in `docker-compose.coolify.yml` absichtlich bei `1`. Dograh startet mehrere Uvicorn-Prozesse auf fortlaufenden Ports; ohne vorgeschalteten internen Load Balancer waeren zusaetzliche Worker nicht erreichbar.
 - `ui` wartet im Spike nur auf `api` gestartet, nicht auf `api` healthy. Das verhindert, dass der erste Deploy wegen langsamer Migrationen/Initialisierung abbricht. Wenn die UI danach nicht erreichbar ist, zuerst die `api`-Container-Logs pruefen.
+- Die Services exposen ihre internen Ports explizit fuer Coolify: `ui:3010`, `api:8000`, `minio:9000`.
 - WebRTC/WebSocket-Funktionen brauchen eine oeffentliche API-Domain (`PUBLIC_BACKEND_URL`) und je nach Netzwerkumgebung TURN.
 - Diese Datei ist eine Spike-Hilfe. Eine produktive Version braucht danach eine separate Entscheidung zu Storage, Provider-Auswahl, AVVs, Loeschkonzept, Zugriffskontrollen und Betriebsprozessen.
