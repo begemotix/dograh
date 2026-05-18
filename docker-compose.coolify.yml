@@ -39,7 +39,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD}
-      MINIO_API_CORS_ALLOW_ORIGIN: ${PUBLIC_UI_URL:?Set PUBLIC_UI_URL}
+      MINIO_API_CORS_ALLOW_ORIGIN: ${PUBLIC_UI_URL:-${SERVICE_URL_UI:-http://localhost:3010}}
     volumes:
       - dograh-minio:/data
     healthcheck:
@@ -60,13 +60,13 @@ services:
       ENVIRONMENT: production
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_TO_FILE: "false"
-      BACKEND_API_ENDPOINT: ${PUBLIC_BACKEND_URL:?Set PUBLIC_BACKEND_URL}
-      UI_APP_URL: ${PUBLIC_UI_URL:?Set PUBLIC_UI_URL}
+      BACKEND_API_ENDPOINT: ${PUBLIC_BACKEND_URL:-${SERVICE_URL_API:-http://localhost:8000}}
+      UI_APP_URL: ${PUBLIC_UI_URL:-${SERVICE_URL_UI:-http://localhost:3010}}
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-dograh}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dograh}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       ENABLE_AWS_S3: ${ENABLE_AWS_S3:-false}
       MINIO_ENDPOINT: minio:9000
-      MINIO_PUBLIC_ENDPOINT: ${PUBLIC_MINIO_URL:?Set PUBLIC_MINIO_URL}
+      MINIO_PUBLIC_ENDPOINT: ${PUBLIC_MINIO_URL:-${SERVICE_URL_MINIO:-http://localhost:9000}}
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: ${MINIO_BUCKET:-voice-audio}
@@ -111,7 +111,7 @@ services:
       context: .
       dockerfile: ui/Dockerfile.coolify
       args:
-        NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:?Set PUBLIC_BACKEND_URL}
+        NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-${SERVICE_URL_API:-http://localhost:8000}}
         NEXT_PUBLIC_NODE_ENV: oss
         NEXT_PUBLIC_CHATWOOT_URL: ""
         NEXT_PUBLIC_CHATWOOT_TOKEN: ""
@@ -123,7 +123,7 @@ services:
     restart: unless-stopped
     environment:
       BACKEND_URL: http://api:8000
-      NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL}
+      NEXT_PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL:-${SERVICE_URL_API:-http://localhost:8000}}
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
       ENABLE_TELEMETRY: "false"

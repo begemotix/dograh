@@ -50,6 +50,7 @@ Zweck:
 - Baut `api` und `ui` aus diesem Clone.
 - Deaktiviert Telemetrie-Defaults per Environment.
 - Nutzt eigene Public URLs fuer UI, API und MinIO.
+- Nutzt Coolifys `SERVICE_URL_*` Werte als Fallback, wenn `PUBLIC_*` nicht manuell gesetzt ist.
 - Verzichtet auf Cloudflared/nginx aus der Upstream-Compose.
 - Laesst `ui` im Spike bereits starten, sobald `api` gestartet ist; der API-Healthcheck bekommt mehr Anlaufzeit.
 
@@ -70,6 +71,7 @@ Risiko:
 
 - Keine echten Secrets eintragen/committen.
 - Nicht fuer echte Anruferdaten verwenden.
+- Manuell gesetzte `PUBLIC_*` Werte muessen echte URLs sein. Platzhaltertexte wie `Set PUBLIC_MINIO_URL` sind ungueltig.
 
 ### `ui/Dockerfile.coolify`
 

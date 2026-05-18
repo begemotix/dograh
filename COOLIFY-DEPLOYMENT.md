@@ -21,6 +21,8 @@ Der Spike veraendert keinen Dograh-Anwendungscode. Insbesondere bleibt MinIO im 
    - Datei-Endpunkt: `minio` auf Port `9000`
 5. MinIO-Konsole auf Port `9001` nicht oeffentlich routen.
 
+Wenn Coolify fuer `ui`, `api` und `minio` automatisch `SERVICE_URL_*` Variablen erzeugt, koennen `PUBLIC_UI_URL`, `PUBLIC_BACKEND_URL` und `PUBLIC_MINIO_URL` leer bleiben. Falls sie manuell gesetzt werden, muessen es echte URLs mit `http://` oder `https://` sein; Platzhaltertexte wie `Set PUBLIC_MINIO_URL` bringen die API beim Start zum Absturz.
+
 ## Spike-Abgrenzung
 
 Die Compose-Variante setzt Telemetrie server- und clientseitig auf `false` und leert PostHog-, Sentry- und Langfuse-Defaults. Das ist fuer einen technischen Spike sinnvoll, aber kein Nachweis fuer DSGVO-Produktionsreife.
