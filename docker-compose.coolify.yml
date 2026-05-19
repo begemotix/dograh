@@ -48,17 +48,30 @@ services:
       retries: 10
 
   dograh-init:
-    image: bash:5.2
-    environment:
-      ENVIRONMENT: "local"
-      TURN_HOST: ${TURN_HOST:?Set TURN_HOST}
-      TURN_SECRET: ${TURN_SECRET:?Set TURN_SECRET}
+    image: busybox:1.36
     volumes:
-      - ./scripts:/workspace/scripts:ro
-      - ./deploy:/workspace/deploy:ro
       - coturn-generated:/generated/coturn
     command:
-      - /workspace/scripts/run_dograh_init.sh
+      - sh
+      - -c
+      - |
+        set -eu
+        mkdir -p /generated/coturn
+        cat > /generated/coturn/turnserver.conf <<EOF
+        listening-port=3478
+        tls-listening-port=5349
+        min-port=49152
+        max-port=49200
+        external-ip=${TURN_HOST:?Set TURN_HOST}
+        realm=dograh.com
+        use-auth-secret
+        static-auth-secret=${TURN_SECRET:?Set TURN_SECRET}
+        fingerprint
+        no-cli
+        no-multicast-peers
+        log-file=stdout
+        EOF
+        echo "dograh-init: turnserver.conf written"
     restart: "no"
 
   coturn:
