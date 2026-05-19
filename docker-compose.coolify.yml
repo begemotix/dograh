@@ -92,6 +92,20 @@ services:
       - -c
       - /etc/coturn/turnserver.conf
 
+  speaches:
+    image: ghcr.io/speaches-ai/speaches:latest-cpu
+    restart: unless-stopped
+    expose:
+      - "8000"
+    volumes:
+      - speaches-hf-cache:/home/ubuntu/.cache/huggingface/hub
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import socket; s=socket.socket(); s.connect((\"localhost\",8000))'"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
   api:
     image: ghcr.io/dograh-hq/dograh-api:latest
     restart: unless-stopped
@@ -182,3 +196,4 @@ volumes:
   dograh-minio:
   dograh-tmp:
   coturn-generated:
+  speaches-hf-cache:
