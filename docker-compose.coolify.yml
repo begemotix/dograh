@@ -107,7 +107,7 @@ services:
       start_period: 90s
 
   api:
-    image: ghcr.io/dograh-hq/dograh-api:latest
+    image: ghcr.io/dograh-hq/dograh-api:1.31.0
     restart: unless-stopped
     expose:
       - "8000"
@@ -161,7 +161,7 @@ services:
       start_period: 180s
 
   ui:
-    image: ghcr.io/dograh-hq/dograh-ui:latest
+    image: ghcr.io/dograh-hq/dograh-ui:1.31.0
     restart: unless-stopped
     expose:
       - "3010"
