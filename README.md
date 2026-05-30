@@ -1,5 +1,16 @@
 # Dograh AI
 
+> **⚠️ Status: `begemotix/dograh` eingestellt**
+>
+> Dieses GitHub-Repository wird **nicht mehr aktiv verfolgt oder gepflegt**.
+> Experimentelle Anpassungen (Coolify-Spike, Image-Pinning, Telemetrie-Deaktivierung
+> u. a.) haben den Fork vom Upstream entfernt und für einen sauberen Betrieb
+> unbrauchbar gemacht — intern als „kaputt-optimiert“ betrachtet.
+>
+> - **Upstream / Referenz:** [dograh-hq/dograh](https://github.com/dograh-hq/dograh)
+> - **Telefonie (Asterisk):** [begemotix/Asterisk](https://github.com/begemotix/Asterisk)
+> - **`main`** bleibt als Snapshot; Feature-Branches auf GitHub wurden entfernt.
+
 **The open-source, self-hostable alternative to Vapi & Retell** — build production voice agents with a drag-and-drop workflow builder. From zero to a working bot in under 2 minutes.
 
 <p align="center">
